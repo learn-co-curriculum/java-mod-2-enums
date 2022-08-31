@@ -5,153 +5,177 @@
 - Explain enums
 - Create and use enums in Java
 
-## Introduction
+## What is an Enum?
 
-Enums are a special kind of class in Java that allows you to define constants
-that can then be used in your program to represent specific values.
+**Enumerations** or **enums** for short are a special kind of class in Java that
+allows us to define a set of constants that can then be used in a program to
+represent specific values.
 
-In the previous example, we used "FLAT", "SLIGHT" and "HEAVY" to represent the
-type of grade curving algorithm we wanted to use. There are 2 issues with the
-way we set up and used those values in our previous example:
-
-1. The literal text for each value is used in 2 different classes, which means
-   it has to match or else the logic will break down. This is error-prone and
-   could lead to bugs that are very difficult to find.
-2. There is no way for the compiler to tell us that we're using an incorrect
-   value for the "grade curving" algorithm
-
-We can address both issues with an Enum:
+A good example could be the days of the week. Say we want to represent the days
+of the week in our program. We could create individual constants like this:
 
 ```java
-    public enum GradeCurvingAlgo {
-        FLAT, SLIGHT, HEAVY
-    }
+public class Example {
+   public static final int MONDAY = 0;
+   public static final int TUESDAY = 1;
+   public static final int WEDNESDAY = 2;
+}
 ```
 
-## Enum Walkthrough
+But a better way would be to create an enum called `Day` for a more structured
+approach:
+
+```java
+public enum Day {
+    MONDAY,
+    TUESDAY,
+    WEDNESDAY,
+    THURSDAY,
+    FRIDAY,
+    SATURDAY,
+    SUNDAY
+}
+```
 
 An enum is defined like a class, except it uses the `enum` keyword instead of
-the `class` keyword. Inside the `enum` definition, you will list out the
-possible values for the `enum`, which are by convention defined with names in
-all upper case.
+the `class` keyword and implicitly extends the `java.lang.Enum` package.
+Inside the `enum` definition, we list out the possible values for the enum,
+which are by convention defined with names in all upper case - just like
+constants. These values are called **enumeration constants**.
 
-Once we have the `enum` defined, we will use those values instead of the
-`String` literal we were using in the previous example.
+It should also be noted that each enumeration constant is associated with a
+numeric value in the order that they are defined. For example, right now, the
+days of the week we have defined in `Day` have the following values:
 
-This is the modified section of `StudentGradeTranslator`:
+```plaintext
+MONDAY = 0
+TUESDAY = 1
+WEDNESDAY = 2
+THURSDAY = 3
+FRIDAY = 4
+SATURDAY = 5
+SUNDAY = 6
+```
+
+If we were to have defined the days of the week starting with Sunday instead of
+Monday, then Sunday would have a numeric value of 0 since the numeric values are
+based on the order the enumeration constants are defined.
+
+## How to use Enums
+
+Let's consider we are trying to schedule a doctor's appointment. We could use
+the enum `Day` to help determine what day of the week a patient is trying to
+schedule an appointment:
 
 ```java
-    public enum GradeCurvingAlgo {
-        FLAT, SLIGHT, HEAVY
+import java.util.Scanner;
+
+public class DoctorOffice {
+
+    private Day appointmentDay;
+
+    DoctorOffice() {
+        appointmentDay = Day.MONDAY;
     }
 
-    public StudentGradeTranslator() {
-        this.gradeCalculator = new FlatCurveGradeCalculator();
+    public void scheduleAppointment(Day appointmentDay) {
+        this.appointmentDay = appointmentDay;
+        System.out.println("Your appointment is on " + appointmentDay);
     }
 
-    public StudentGradeTranslator(GradeCurvingAlgo gradingMethod) {
-        if (gradingMethod == null) {
-            this.gradeCalculator = new FlatCurveGradeCalculator();
-        } else if (gradingMethod == GradeCurvingAlgo.FLAT) {
-            this.gradeCalculator = new FlatCurveGradeCalculator();
-        } else if (gradingMethod == GradeCurvingAlgo.SLIGHT) {
-            this.gradeCalculator = new SlightCurveGradeCalculator();
-        } else if (gradingMethod == GradeCurvingAlgo.HEAVY) {
-            this.gradeCalculator = new HeavyCurveGradeCalculator();
+    public static void main(String[] args) {
+        System.out.println("What day would you like to make your appointment?");
+
+        Scanner scanner = new Scanner(System.in);
+        String appointmentDay = scanner.nextLine();
+        
+        try {
+            appointmentDay = appointmentDay.toUpperCase();
+
+            DoctorOffice office = new DoctorOffice();
+            office.scheduleAppointment(Day.valueOf(appointmentDay));
+        } catch (IllegalArgumentException e) {
+            System.out.println("Did not enter a day of the week");
         }
     }
+}
 ```
 
-And this is the modified version of `InnerClassRunner`:
+In the class `DoctorOffice`, we have a private instance variable of our enum,
+`appointmentDay` that we can assign to one of our enumeration constants. To
+assign to one of our enumeration constants, we can either assign it using the
+syntax:
+
+```plaintext
+<enumeration name>.<enumeration constant>
+// Day.MONDAY or Day.TUESDAY
+```
+
+Or we could assign it to another `Day` type, like we do in the
+`scheduleAppointment()` method.
+
+In our `main()` method, when we ask the user what day they would like to
+schedule their appointment, we use the `valueOf()` method. This is a method that
+is part of the `java.lang.Enum` class that will return the `Day` type of the
+`String` argument. For example, `Day.valueOf("WEDNESDAY")` would return the
+enumeration constant of `WEDNESDAY`.
+
+So if we were to run the code above, we might have an output like this:
+
+```plaintext
+What day would you like to make your appointment?
+Monday
+Your appointment is on MONDAY
+```
+
+We can also use the enum in if statements. For example, if we want to check
+if the `appointmentDay` is Monday, we could do something like this:
 
 ```java
-        StudentGradeTranslator gradeTranslator = new StudentGradeTranslator(StudentGradeTranslator.GradeCurvingAlgo.SLIGHT);
+public void scheduleAppointment(Day appointmentDay) {
+    // Example using enumerations in if statements
+    if (appointmentDay == Day.MONDAY) {
+        System.out.println("Hello Monday");
+    }
+}
 ```
 
-As you can see, we couldn't use an invalid value for the "curving algorithm"
-anymore because the Java compiler would tell us right away that the value we're
-trying to use is not defined in the `enum` we are referencing.
+Enumerations can also be used in switch statements as well:
+
+```java
+public void scheduleAppointment(Day appointmentDay) {
+    // Example using enumerations in a switch statement
+        switch (appointmentDay) {
+            case MONDAY:
+                System.out.println("Manic Monday!");
+                break;
+            case TUESDAY:
+                System.out.println("It's Tuesday!");
+                break;
+            case WEDNESDAY:
+                System.out.println("Middle of the week!");
+                break;
+            case THURSDAY:
+                System.out.println("It's Thursday!");
+                break;
+            case FRIDAY:
+                System.out.println("Freaky Friday!");
+                break;
+            case SATURDAY:
+                System.out.println("Yay! It's Saturday!");
+                break;
+            case SUNDAY:
+                System.out.println("Sunday Fun-Day!");
+                break;
+        }
+}
+```
 
 Here are other important characteristics of Enums in Java:
 
-1. Enums cannot be instantiated - they can only be referenced as outlined above
-2. Enums can safely be compared using the `==` operator, as in the example above
-3. Enums are implicitly `static` and `final` - we will explain what this means
-   in a later section
+1. Enums cannot be instantiated - they can only be referenced.
+2. Enums can safely be compared using the `==` operator, as in the example above.
+3. Enums are implicitly `static` and `final`.
 4. All Enums implicitly extend `java.lang.Enum`, so they cannot extend anything
-   else
-5. Enums can be declared outside or inside a class, but not inside a method
-
-In addition to the above, you can also specify and reference values for Enums,
-so that you can associate a value with each constant. In our example, we can
-take advantage of this feature to create a label for each grade curving
-algorithm:
-
-```java
-    public enum GradeCurvingAlgo {
-        FLAT("Flat grading, so 90 = A and so on"),
-        SLIGHT("Slight curving of the grades, so the grade line is moved down by 5 points so that 85 = A and so on"),
-        HEAVY("Heavy curving of the grades, so the grade line is moved down by 10 points so that 80 = A and so on");
-
-        String label;
-
-        private GradeCurvingAlgo(String label) {
-            this.label = label;
-        }
-    }
-```
-
-We also change the constructor to keep track of the active grading algorithm, so
-we can easily reference it when we need to:
-
-```java
-    GradeCalculator gradeCalculator;
-    GradeCurvingAlgo activeGradeAlgo;
-
-    public enum GradeCurvingAlgo {
-        FLAT("Flat grading, so 90 = A and so on"),
-        SLIGHT("Slight curving of the grades, so the grade line is moved down by 5 points so that 85 = A and so on"),
-        HEAVY("Heavy curving of the grades, so the grade line is moved down by 10 points so that 80 = A and so on");
-
-        String label;
-
-        private GradeCurvingAlgo(String label) {
-            this.label = label;
-        }
-    }
-
-    public StudentGradeTranslator() {
-        this.gradeCalculator = new FlatCurveGradeCalculator();
-        this.activeGradeAlgo = GradeCurvingAlgo.FLAT;
-    }
-
-    public StudentGradeTranslator(GradeCurvingAlgo gradingMethod) {
-        if (gradingMethod == null) {
-            this.gradeCalculator = new FlatCurveGradeCalculator();
-            activeGradeAlgo = GradeCurvingAlgo.FLAT;
-        } else {
-            if (gradingMethod == GradeCurvingAlgo.FLAT) {
-                this.gradeCalculator = new FlatCurveGradeCalculator();
-            } else if (gradingMethod == GradeCurvingAlgo.SLIGHT) {
-                this.gradeCalculator = new SlightCurveGradeCalculator();
-            } else if (gradingMethod == GradeCurvingAlgo.HEAVY) {
-                this.gradeCalculator = new HeavyCurveGradeCalculator();
-            }
-            activeGradeAlgo = gradingMethod;
-        }
-    }
-```
-
-This can then be used by anyone using the `enum` by referencing the new variable
-just like you would for a class:
-
-```java
-        // get all the student and their grades using each entry
-        System.out.println("List of students and their grades (" + gradeTranslator.activeGradeAlgo.label + "): ");
-        for (Map.Entry<String, String> studentGrade: studentGrades.entrySet()) {
-           System.out.println(studentGrade.getKey() + "'s grade is " +
-           gradeTranslator.getLetterGrade(Integer.parseInt(studentGrade.getValue())));
-           System.out.println("Passing grade status: " + gradeTranslator.isPassingGrade(Integer.parseInt(studentGrade.getValue())));
-        }
-
-```
+   else.
+5. Enums can be declared outside or inside a class, but not inside a method.
